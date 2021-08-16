@@ -7,13 +7,6 @@ let country = ',de';
 let units = '&units=imperial'
 const apiKey = '&appid=30546cd877be29c0942a45ebca74c7b6';
 
-
-//// Current Date Instance
-let d = new Date();
-let newDate = d.getMonth()+1+'-'+ d.getDate()+'-'+ d.getFullYear();
-
-
-
 // ROUTES
 
 //// GET - request latest weather object
@@ -69,7 +62,11 @@ let getCurrentWeatherByCity = async (baseURL, zip, apiKey)=>{
 
 //// Fetch user input, initiate weather request and post data to API
 const requestWeather = function(){
-    zip = document.getElementById('zip').value;
+    //// Current Date Instance
+    let d = new Date();
+    let newDate = d.getMonth()+1+'-'+ d.getDate()+'-'+ d.getFullYear();
+    let zip = document.getElementById('zip').value;
+    
     getCurrentWeatherByCity(baseURL, zip, apiKey)
         .then(function(temperature){
             item = {
@@ -92,3 +89,11 @@ const requestWeather = function(){
 
 //// Event Listener to fetch user input
 document.getElementById('generate').addEventListener('click', requestWeather);
+
+
+/*
+export { requestWeather }
+export { getCurrentWeatherByCity }
+export { postWeatherData }
+export { getLatestWeatherData }
+*/
