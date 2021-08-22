@@ -1,7 +1,12 @@
 // APP & SERVER CONFIGURATION
 
+//// Require dotenv to use variables from a .env file
+const dotenv = require('dotenv');
+dotenv.config();
 //// Require Express to run server and routes
 const express = require('express');
+//// Require Fetch to use fetch in the functions
+const fetch = require("node-fetch");
 //// Start up an instance of app
 const app = express();
 
@@ -15,7 +20,7 @@ const cors = require('cors');
 app.use(cors());
 
 //// Initialize the main project folder
-app.use(express.static('src/client'));
+app.use(express.static('dist'));
 
 //// Configure Server
 const port = 8000;
@@ -26,8 +31,6 @@ function listening() {
     console.log(`on localhost ${port}`);
 };
 
-
-
 // DATABASE
 
 //// Setup empty JS object to act as endpoint for all routes
@@ -37,8 +40,8 @@ const projectData = {};
 // ROUTES
 
 //// GET - send project data array
-app.get('/weatherdata', get_weather_data)
-function get_weather_data (req, res) {
+app.get('/latestweatherdata', get_latest_weather_data)
+function get_latest_weather_data (req, res) {
     if (projectData === true) {
         res.send(projectData);
     } else {
@@ -46,12 +49,42 @@ function get_weather_data (req, res) {
     };
 };
 
-//// POST - Retrieve Weather Data
-app.post('/weatherdata', post_weather_data)
-function post_weather_data (req, res) {
-    projectData.temperature = req.body.temperature;
-    projectData.date = req.body.date;
-    projectData.userInput = req.body.userInput;
+//// POST - send project data array
+app.post('/weatherdata', get_weather_data)
+function get_weather_data (req, res) {
+    zip = req.body.zip
+    console.log(zip)
+    feelings = req.body.feelings
+    console.log(feelings)
+    let d = new Date()
+    let newDate = d.getMonth()+1+'-'+ d.getDate()+'-'+ d.getFullYear()
+    console.log(newDate)
+    
+    getCurrentWeatherByCity(zip)
+        .then(function(temperature){
+            console.log(temperature)
+            projectData.temperature = temperature;
+            projectData.date = newDate
+            projectData.userInput = feelings;
+            console.log(projectData)
+        })
+            .then(function(){
+                res.send(projectData)
+            })
+}
 
-    res.send(projectData);
+
+// HELPER FUNCIONS
+
+//// Fetch Weather Data from OWA API by ZIP
+let getCurrentWeatherByCity = async (zip) => {
+    const res = await fetch(process.env.BASE_URL+zip+process.env.COUNTRY+process.env.UNITS+process.env.API_KEY);
+    try {
+        const data = await res.json();    
+        const temperature = data.main.temp;
+        console.log(temperature)
+        return temperature;
+    } catch(error) {
+        console.log("ERROR", error);
+    }  
 };
